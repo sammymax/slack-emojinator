@@ -13,31 +13,24 @@ Prepare a directory that contains an image for each emoji you want to create. Re
 Clone the project, create a new virtualenv, and install the prereqs:
 
 ```bash
-git clone https://github.com/smashwilson/slack-emojinator.git
+git clone https://github.com/sammymax/slack-emojinator.git
 cd slack-emojinator
 mkvirtualenv slack-emojinator
 pip install -r requirements.txt
 ```
 
-You'll need to provide your team name (the bit before ".slack.com" in your admin URL) and your session cookie (grab it from your browser). Copy `.env.example`, fill them in, and source it.
-
-To grab your Slack session cookie:
-* [Open your browser's dev tools](http://webmasters.stackexchange.com/a/77337) and copy the value of `document.cookie`
-* Go to the Network tab
-* Re-load page like https://{teamname}.slack.com/customize/emoji
+Now, you need to get your Slack session cookie, needed for the python script to authenticate and upload emojis:
+* Go to https://{teamname}.slack.com/customize/emoji and then [open your browser's dev tools](http://webmasters.stackexchange.com/a/77337)
+* Go to the Network tab, then reload the page
 * Find call to `emoji` (it is most likely the very top request)
-* Scroll to `Request-Headers` and copy the value of Cookie and add to .env
+* Scroll to `Request-Headers` and copy the value of Cookie
+
+Now, you're ready to run the python script. `TEAM_NAME` is the bit before ".slack.com" in the url, and `SESSION_COOKIE` is what you just copied.
+
 
 ```bash
-cp .env.example .env
-${EDITOR} .env
-source .env
+python upload.py ${TEAM_NAME} ${SESSION_COOKIE} ${EMOJI_DIR}/*.png
 ```
 
-Now you're ready to go. Use a shell glob to invoke `upload.py` with the emoji files as ARGV:
-
-```bash
-python upload.py ${EMOJI_DIR}/*.png
-```
-
+Remember to put quotes around the cookie! Otherwise spaces in the cookie string will screw up python.
 :sparkles:

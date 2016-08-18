@@ -10,8 +10,8 @@ import requests
 
 from bs4 import BeautifulSoup
 
-team_name = os.getenv('SLACK_TEAM')
-cookie = os.getenv('SLACK_COOKIE')
+team_name = sys.argv[1]
+cookie = sys.argv[2]
 
 url = "https://{}.slack.com/customize/emoji".format(team_name)
 headers = {
@@ -21,13 +21,14 @@ headers = {
 
 def main():
     existing_emojis = get_current_emoji_list()
+    print (existing_emojis)
     uploaded = 0
     skipped = 0
-    for filename in sys.argv[1:]:
+    for filename in sys.argv[3:]:
         print("Processing {}.".format(filename))
         emoji_name = os.path.splitext(os.path.basename(filename))[0]
         if emoji_name in existing_emojis:
-            print("Skipping {}. Emoji already exists").format(emoji_name)
+            print("Skipping {}. Emoji already exists".format(emoji_name))
             skipped += 1
         else:
             upload_emoji(emoji_name, filename)
@@ -60,7 +61,7 @@ def upload_emoji(emoji_name, filename):
     r = requests.post(url, headers=headers, data=data, files=files, allow_redirects=False)
     r.raise_for_status()
     # Slack returns 200 OK even if upload fails, so check for status of 'alert_error' info box
-    if 'alert_error' in r.content:
+    if b'alert_error' in r.content:
         soup = BeautifulSoup(r.text, "html.parser")
         crumb = soup.find("p", attrs={"class": "alert_error"})
         raise Exception("Error with uploading %s: %s" % (emoji_name, crumb.text))
