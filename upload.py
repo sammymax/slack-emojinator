@@ -10,41 +10,35 @@ import requests
 
 from bs4 import BeautifulSoup
 
-team_name = sys.argv[1]
-cookie = sys.argv[2]
-
-url = "https://{}.slack.com/customize/emoji".format(team_name)
-headers = {
-    'Cookie': cookie,
-}
-
-
-def main():
-    existing_emojis = get_current_emoji_list()
+def main(team_name, cookie, files):
+    url = "https://{}.slack.com/customize/emoji".format(team_name)
+    headers = { 'Cookie': cookie }
+    
+    existing_emojis = get_current_emoji_list(headers)
     print (existing_emojis)
     uploaded = 0
     skipped = 0
-    for filename in sys.argv[3:]:
+    for filename in files:
         print("Processing {}.".format(filename))
         emoji_name = os.path.splitext(os.path.basename(filename))[0]
         if emoji_name in existing_emojis:
             print("Skipping {}. Emoji already exists".format(emoji_name))
             skipped += 1
         else:
-            upload_emoji(emoji_name, filename)
+            upload_emoji(emoji_name, filename, url, headers)
             print("{} upload complete.".format(filename))
             uploaded += 1
     print('\nUploaded {} emojis. ({} already existed)'.format(uploaded, skipped))
 
 
-def get_current_emoji_list():
+def get_current_emoji_list(headers):
     r = requests.get(url, headers=headers)
     r.raise_for_status()
     x = re.findall("data-emoji-name=\"(.*)\"", r.text)
     return x
 
 
-def upload_emoji(emoji_name, filename):
+def upload_emoji(emoji_name, filename, url, headers):
     # Fetch the form first, to generate a crumb.
     r = requests.get(url, headers=headers)
     r.raise_for_status()
@@ -67,4 +61,4 @@ def upload_emoji(emoji_name, filename):
         raise Exception("Error with uploading %s: %s" % (emoji_name, crumb.text))
 
 if __name__ == '__main__':
-    main()
+    main(sys.argv[1], sys.argv[2], sys.argv[3:])
