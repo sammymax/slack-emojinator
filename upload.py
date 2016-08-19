@@ -14,7 +14,7 @@ def main(team_name, cookie, files):
     url = "https://{}.slack.com/customize/emoji".format(team_name)
     headers = { 'Cookie': cookie }
     
-    existing_emojis = get_current_emoji_list(headers)
+    existing_emojis = get_current_emoji_list(url, headers)
     print (existing_emojis)
     uploaded = 0
     skipped = 0
@@ -31,7 +31,7 @@ def main(team_name, cookie, files):
     print('\nUploaded {} emojis. ({} already existed)'.format(uploaded, skipped))
 
 
-def get_current_emoji_list(headers):
+def get_current_emoji_list(url, headers):
     r = requests.get(url, headers=headers)
     r.raise_for_status()
     x = re.findall("data-emoji-name=\"(.*)\"", r.text)
